@@ -17,13 +17,23 @@
 #
 
 VERSION=2013102901
-CXXFLAGS=-DVERSION="\"gr-scan $(VERSION)\""  -Wall -lgnuradio-filter -lgnuradio-blocks -lgnuradio-pmt -lgnuradio-fft -lgnuradio-runtime -lgnuradio-osmosdr -lboost_system -O2 -s -Wno-unused-function
+CXXFLAGS=-DVERSION="\"gr-scan $(VERSION)\""  -Wall -frtti -std=c++11
+LDFLAGS=$(CXXFLAGS) -llog4cpp -lboost_system -lgnuradio-runtime -lgnuradio-filter -lgnuradio-blocks -lgnuradio-pmt -lgnuradio-fft -lgnuradio-soapy -lrtlsdr -g -Wno-unused-function 
 
-gr-scan: *.cpp *.hpp Makefile
-	g++ $(CXXFLAGS) -o gr-scan main.cpp
+gr-scan: main.o scanner_sink.o topblock.o
+	g++ $(LDFLAGS) -o gr-scan main.o scanner_sink.o topblock.o
+
+main.o: main.cpp *.hpp
+	g++ $(CXXFLAGS) -c -o main.o main.cpp
+
+scanner_sink.o: scanner_sink.cpp *.hpp
+	g++ $(CXXFLAGS) -c -o scanner_sink.o scanner_sink.cpp
+
+topblock.o: topblock.cpp *.hpp
+	g++ $(CXXFLAGS) -c -o topblock.o topblock.cpp
 
 clean:
-	rm -f gr-scan gr-scan.tar.gz
+	rm -f gr-scan main.o gr-scan.tar.gz
 
 dist:
 	mkdir gr-scan-$(VERSION)
