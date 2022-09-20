@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: build
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     - name: Update
       run: sudo apt update
     - name: Install GNU Radio
-      run: sudo apt -y install gnuradio gnuradio-dev liblog4cpp5-dev liblog4cpp5v5 libboost-system1.71.0 libboost-system1.71-dev libgnuradio-filter3.9.8 libgnuradio-blocks3.9.8 libgnuradio-pmt3.9.8 libgnuradio-fft3.9.8 libgnuradio-soapy3.9.8 soapysdr0.7-module-rtlsdr librtlsdr0
+      run: sudo apt -y install gnuradio gnuradio-dev liblog4cpp5-dev liblog4cpp5v5 libboost-system1.71.0 libboost-system1.71-dev libgnuradio-filter3.9.8 libgnuradio-blocks3.9.8 libgnuradio-pmt3.9.8 libgnuradio-fft3.9.8 libgnuradio-soapy3.9.8 soapysdr0.7-module-rtlsdr librtlsdr0 libsoapysdr-dev
     - name: make
       run: make
     - name: Create Release
