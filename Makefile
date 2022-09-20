@@ -18,7 +18,7 @@
 
 VERSION=2013102901
 CXXFLAGS=-DVERSION="\"gr-scan $(VERSION)\""  -Wall -frtti -std=c++11
-LDFLAGS=$(CXXFLAGS) -llog4cpp -lboost_system -lgnuradio-runtime -lgnuradio-filter -lgnuradio-blocks -lgnuradio-pmt -lgnuradio-fft -lgnuradio-soapy -lrtlsdr -g -Wno-unused-function 
+LDFLAGS=$(CXXFLAGS) -llog4cpp -lboost_system -lgnuradio-runtime -lgnuradio-filter -lgnuradio-blocks -lgnuradio-pmt -lgnuradio-fft -lgnuradio-soapy -g -Wno-unused-function 
 
 gr-scan: main.o scanner_sink.o topblock.o
 	g++ $(LDFLAGS) -o gr-scan main.o scanner_sink.o topblock.o
