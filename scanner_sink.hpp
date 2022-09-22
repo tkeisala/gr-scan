@@ -21,23 +21,21 @@
 #include <set>
 #include <utility>
 
-#include <boost/shared_ptr.hpp>
-
-#include <gnuradio/soapy/source.h>
 #include <gnuradio/block.h>
 #include <gnuradio/io_signature.h>
+#include <osmosdr/source.h>
 
 class scanner_sink : public gr::block
 {
 	public:
 		typedef std::shared_ptr<scanner_sink> sptr;
 
-		scanner_sink(gr::soapy::source::sptr source, unsigned int vector_length, double centre_freq_1, double centre_freq_2, double bandwidth0, double bandwidth1, double bandwidth2,
+		scanner_sink(osmosdr::source::sptr source, unsigned int vector_length, double centre_freq_1, double centre_freq_2, double bandwidth0, double bandwidth1, double bandwidth2,
 				double step, unsigned int avg_size, double spread, double threshold, double ptime, FILE *outcsv);
 
-		~scanner_sink();
+		~scanner_sink() override;
 
-		static sptr make(gr::soapy::source::sptr source, unsigned int vector_length, double centre_freq_1, double centre_freq_2, double bandwidth0, double bandwidth1, double bandwidth2,
+		static sptr make(osmosdr::source::sptr source, unsigned int vector_length, double centre_freq_1, double centre_freq_2, double bandwidth0, double bandwidth1, double bandwidth2,
 					  	 double step, unsigned int avg_size, double spread, double threshold, double ptime, FILE *outcsv);
 		
 	private:
@@ -53,7 +51,7 @@ class scanner_sink : public gr::block
 		
 		//std::set<std::pair<double, double>> m_signals;
 		std::set<double> m_signals;
-		gr::soapy::source::sptr m_source;
+		osmosdr::source::sptr m_source;
 		float *m_buffer;
 		unsigned int m_vector_length;
 		unsigned int m_count;

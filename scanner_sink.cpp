@@ -18,9 +18,10 @@
 
 #include "scanner_sink.hpp"
 #include <boost/foreach.hpp>
+#include <gnuradio/buffer_double_mapped.h>
 
 scanner_sink::scanner_sink(
-    gr::soapy::source::sptr source,
+    osmosdr::source::sptr source,
     unsigned int vector_length,
     double centre_freq_1,
     double centre_freq_2,
@@ -36,7 +37,7 @@ scanner_sink::scanner_sink(
     gr::block (
         "scanner_sink",
         gr::io_signature::make (1, 1, sizeof (float) * vector_length),
-        gr::io_signature::make (0, 0, 0)),
+        gr::io_signature::make (0, 0, sizeof (float))),
     m_source(source), //We need the source in order to be able to control it
     m_buffer(new float[vector_length]), //buffer into which we accumulate the total for averaging
     m_vector_length(vector_length), //size of the FFT
@@ -112,13 +113,73 @@ void scanner_sink::ProcessVector(float *input)
                 }
                 
                 m_centre_freq_1 += m_step; //calculate the frequency we should change to
-                m_source->set_frequency(0, m_centre_freq_1);
-                double actual = m_source->get_frequency(0);
+                double actual = m_source->set_center_freq(m_centre_freq_1);
                 if ((m_centre_freq_1 - actual < 10.0) && (actual - m_centre_freq_1 < 10.0)){ //success
                     break; //so stop changing frequency
                 }
             }
             m_wait_count = 0; //new frequency - we've listenned 0 times on it
+        }
+    }
+}
+
+void scanner_sink::PrintSignals(double *freqs, float *bands1, float *bands2)
+{
+    /* Calculate the current time after start */
+    unsigned int t = time(0) - m_start_time;
+    unsigned int hours = t / 3600;
+    unsigned int minutes = (t % 3600) / 60;
+    unsigned int seconds = t % 60;
+    
+    //Print that we finished scanning something
+    fprintf(stderr, "%02u:%02u:%02u: Finished scanning %f MHz - %f MHz\n",
+        hours, minutes, seconds, (m_centre_freq_1 - m_bandwidth0/2.0)/1000000.0, (m_centre_freq_1 + m_bandwidth0/2.0)/1000000.0);
+    
+    /* Calculate the differences between the fine and coarse window bands */
+    float diffs[m_vector_length];
+    for (unsigned int i = 0; i < m_vector_length; i++){
+        diffs[i] = bands1[i] - bands2[i];
+    }
+    
+    /* Look through to find signals */
+    //start with no signal found (note: diffs[0] should always be very negative because of the way the windowing function works)
+    bool sig = false;
+    unsigned int peak = 0;
+    for (unsigned int i = 0; i < m_vector_length; i++){
+        if (sig){ //we're already in a signal
+            if (diffs[peak] < diffs[i]){ //we found a rough end to the signal
+                peak = i;
+            }
+            
+            if (diffs[i] < m_threshold){ //we're transitionning to the end
+                /* look for the "start" of the signal */
+                unsigned int min = peak; //scan outwards for the minimum
+                while ((diffs[min] > diffs[peak] - 3.0) && (min > 0)){ //while the signal is still more than half power
+                    min--;
+                }
+                
+                /* look for the "end" */
+                unsigned int max = peak;
+                while ((diffs[max] > diffs[peak] - 3.0) && (max < m_vector_length - 1)){
+                    max++;
+                }
+                sig = false; //we're now in no signal state
+                
+                /* Print the signal if it's a genuine hit */
+                if (TrySignal(freqs[max], freqs[min])){
+                    printf("[+] %02u:%02u:%02u: Found signal: at %f MHz of width %f kHz, peak power %f dB (difference %f dB)\n",
+                        hours, minutes, seconds, (freqs[max] + freqs[min]) / 2000000.0, (freqs[max] - freqs[min])/1000.0, bands1[peak], diffs[peak]);
+                    WriteCSV((freqs[max] + freqs[min]) / 2000000.0,
+                        (freqs[max] - freqs[min])/1000.0,
+                        bands1[peak], diffs[peak]);
+                }
+            }
+        }
+        else {
+            if (diffs[i] >= m_threshold){ //we found a signal!
+                peak = i;
+                sig = true;
+            }
         }
     }
 }
@@ -206,7 +267,7 @@ void scanner_sink::WriteCSV(float freq, float width, float peak, float diff)
 }
 
 scanner_sink::sptr scanner_sink::make(
-    gr::soapy::source::sptr source,
+    osmosdr::source::sptr source,
     unsigned int vector_length,
     double centre_freq_1,
     double centre_freq_2,

@@ -35,7 +35,7 @@ TopBlock::TopBlock(
     window(GetWindow(vector_length)),
 
     /* Soapy rtlsdr source. */
-    source(gr::soapy::source::make("", "rtlsdr", 1)),
+    source(osmosdr::source::make()),
     stv(gr::blocks::stream_to_vector::make(sizeof(float)*2, vector_length)), /* Stream to vector */
     /* Based on the logpwrfft (a block implemented in python) */
     fft(gr::fft::fft_v<double, true>::make(vector_length, window, false, 1)),
@@ -45,13 +45,13 @@ TopBlock::TopBlock(
     /* Sink - this does most of the interesting work */
     sink(scanner_sink::make(source, vector_length, centre_freq_1, centre_freq_2, sample_rate, bandwidth1, bandwidth2, step, avg_size, spread, threshold, ptime, outcsv))
 {
-    /* Set up the Soapy Source */
-    source->set_sample_rate(0, sample_rate);
-    source->set_frequency(0, centre_freq_1);
-    source->set_frequency_correction(0, 0.0);
-    source->set_gain_mode(0, false);
-    source->set_gain(0, 10.0);
-    //source->set_if_gain(20.0);
+    /* Set up the Osmosdr Source */
+    source->set_sample_rate(sample_rate);
+    source->set_center_freq(centre_freq_1);
+    source->set_freq_corr(0.0);
+    source->set_gain_mode(false);
+    source->set_gain(10.0);
+    source->set_if_gain(20.0);
 
     /* Set up the connections */
     connect(source, 0, stv, 0);
@@ -60,10 +60,6 @@ TopBlock::TopBlock(
     connect(ctf, 0, iir, 0);
     connect(iir, 0, lg, 0);
     connect(lg, 0, sink, 0);
-}
-
-TopBlock::~TopBlock()
-{
 }
 
 std::vector<float> TopBlock::GetWindow(size_t n)
