@@ -34,11 +34,11 @@ TopBlock::TopBlock(
     vector_length(sample_rate/fft_width),
     window(GetWindow(vector_length)),
 
-    /* Soapy rtlsdr source. */
+    /* Osmosdr rtlsdr source. */
     source(osmosdr::source::make()),
-    stv(gr::blocks::stream_to_vector::make(sizeof(float)*2, vector_length)), /* Stream to vector */
+    stv(gr::blocks::stream_to_vector::make(sizeof(float)*2, vector_length/2)), /* Stream to vector */
     /* Based on the logpwrfft (a block implemented in python) */
-    fft(gr::fft::fft_v<double, true>::make(vector_length, window, false, 1)),
+    fft(gr::fft::fft_v<float, true>::make(vector_length, window, false, 1)),
     ctf(gr::blocks::complex_to_mag_squared::make(vector_length)),
     iir(gr::filter::single_pole_iir_filter_ff::make(1.0, vector_length)),
     lg(gr::blocks::nlog10_ff::make(10, vector_length, -20 * std::log10(float(vector_length)) -10 * std::log10(float(GetWindowPower()/vector_length)))),
@@ -51,7 +51,7 @@ TopBlock::TopBlock(
     source->set_freq_corr(0.0);
     source->set_gain_mode(false);
     source->set_gain(10.0);
-    source->set_if_gain(20.0);
+    //source->set_if_gain(20.0);
 
     /* Set up the connections */
     connect(source, 0, stv, 0);
@@ -60,6 +60,9 @@ TopBlock::TopBlock(
     connect(ctf, 0, iir, 0);
     connect(iir, 0, lg, 0);
     connect(lg, 0, sink, 0);
+}
+
+TopBlock::~TopBlock() {
 }
 
 std::vector<float> TopBlock::GetWindow(size_t n)

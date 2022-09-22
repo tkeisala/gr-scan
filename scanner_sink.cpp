@@ -109,7 +109,8 @@ void scanner_sink::ProcessVector(float *input)
                 if (m_centre_freq_2 <= m_centre_freq_1){ //we reached the end!
                     //do something to end the scan
                     fprintf(stderr, "[*] Finished scanning\n"); //say we're exiting
-                    exit(0); //TODO: This probably isn't the right thing, but it'll do for now
+                    //exit(0); //TODO: This probably isn't the right thing, but it'll do for now
+                    break;
                 }
                 
                 m_centre_freq_1 += m_step; //calculate the frequency we should change to

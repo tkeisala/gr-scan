@@ -38,6 +38,8 @@ class TopBlock : public gr::top_block
 		TopBlock(double centre_freq_1, double centre_freq_2, double sample_rate, double fft_width, double bandwidth1, double bandwidth2,
 				double step, unsigned int avg_size, double spread, double threshold, double ptime, FILE *outcsv);
 
+		virtual ~TopBlock();
+
 	private:
 		/* http://en.wikipedia.org/w/index.php?title=Window_function&oldid=508445914 */
 		std::vector<float> GetWindow(size_t n);
@@ -48,7 +50,7 @@ class TopBlock : public gr::top_block
 
 		osmosdr::source::sptr source;
 		gr::blocks::stream_to_vector::sptr stv;
-		gr::fft::fft_v<double, true>::sptr fft;
+		gr::fft::fft_v<float, true>::sptr fft;
 		gr::blocks::complex_to_mag_squared::sptr ctf;
 		gr::filter::single_pole_iir_filter_ff::sptr iir;
 		gr::blocks::nlog10_ff::sptr lg;

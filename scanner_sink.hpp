@@ -33,7 +33,7 @@ class scanner_sink : public gr::block
 		scanner_sink(osmosdr::source::sptr source, unsigned int vector_length, double centre_freq_1, double centre_freq_2, double bandwidth0, double bandwidth1, double bandwidth2,
 				double step, unsigned int avg_size, double spread, double threshold, double ptime, FILE *outcsv);
 
-		~scanner_sink() override;
+		virtual ~scanner_sink();
 
 		static sptr make(osmosdr::source::sptr source, unsigned int vector_length, double centre_freq_1, double centre_freq_2, double bandwidth0, double bandwidth1, double bandwidth2,
 					  	 double step, unsigned int avg_size, double spread, double threshold, double ptime, FILE *outcsv);
