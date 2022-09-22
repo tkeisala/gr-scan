@@ -51,7 +51,7 @@ TopBlock::TopBlock(
     source->set_freq_corr(0.0);
     source->set_gain_mode(false);
     source->set_gain(10.0);
-    //source->set_if_gain(20.0);
+    source->set_if_gain(20.0);
 
     /* Set up the connections */
     connect(source, 0, stv, 0);
