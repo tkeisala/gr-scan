@@ -16,7 +16,7 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
 #
 
-VERSION=2013102901
+VERSION=2022092201
 CXXFLAGS=-DVERSION="\"gr-scan $(VERSION)\"" -I/usr/local/include  -Wall -g -std=c++11 -Wno-unused-function
 LDFLAGS=$(CXXFLAGS) -lstdc++ -llog4cpp -lboost_system -lgnuradio-blocks -lgnuradio-pmt -lgnuradio-fft -lgnuradio-filter -lgnuradio-osmosdr -lgnuradio-runtime -lpython3.8 -L/usr/local/lib/x86_64-linux-gnu
 
