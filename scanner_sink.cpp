@@ -73,16 +73,18 @@ int scanner_sink::general_work(
     gr_vector_void_star &output_items
 )
 {
+    int e=0;
     for (int i = 0; i < ninput_items[0]; i++){
-        ProcessVector(((float *)input_items[0]) + i * m_vector_length);
+        e=ProcessVector(((float *)input_items[0]) + i * m_vector_length);
     }
     
     consume_each(ninput_items[0]);
-    return 0;
+    return e;
 }
 
-void scanner_sink::ProcessVector(float *input)
+int scanner_sink::ProcessVector(float *input)
 {
+    int e=0;
     //Add the FFT to the total
     for (unsigned int i = 0; i < m_vector_length; i++){
         m_buffer[i] += input[i];
@@ -110,6 +112,7 @@ void scanner_sink::ProcessVector(float *input)
                     //do something to end the scan
                     fprintf(stderr, "[*] Finished scanning\n"); //say we're exiting
                     //exit(0); //TODO: This probably isn't the right thing, but it'll do for now
+                    e=-1;
                     break;
                 }
                 
@@ -122,6 +125,7 @@ void scanner_sink::ProcessVector(float *input)
             m_wait_count = 0; //new frequency - we've listenned 0 times on it
         }
     }
+    return e;
 }
 
 void scanner_sink::PrintSignals(double *freqs, float *bands1, float *bands2)
