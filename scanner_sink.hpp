@@ -40,7 +40,7 @@ class scanner_sink : public gr::block
 		
 	private:
 		int general_work(int noutput_items, gr_vector_int &ninput_items, gr_vector_const_void_star &input_items, gr_vector_void_star &output_items);
-		void ProcessVector(float *input);
+		int ProcessVector(float *input);
 		void PrintSignals(double *freqs, float *bands1, float *bands2);
 		bool TrySignal(double min, double max);
 		void Rearrange(float *bands, double *freqs, double centre, double bandwidth);
